@@ -1,0 +1,275 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+<br />
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12">
+        <h5 class="text-info">Policy Inquiry</h5>
+    </div>
+</div>
+
+<form method="post" action='@Url.Action("Inq")'>
+    <div class="row">
+
+        <div class="col-4 col-sm-4 col-md-4">
+
+            <div class="form-group">
+                @(Html.Kendo().TextBox()
+                        .Name("txtSearch")
+                        .Placeholder("ค้นหาทะเบียนรถยนต์ ,กรมธรรม์ และ GpsID")
+                          .HtmlAttributes(new { style = "width: 100%", placeholder = "ทะเบียนรถยนต์ หรือกรมธรรม์", required = "required", validationmessage = "Enter {0}" })
+                    )
+            </div>
+
+
+        </div>
+        <div class="col-4 col-sm-4 col-md-4">
+            <div class="form-group text-left">
+                @(Html.Kendo().Button()
+                        .Name("BtnSearch")
+                        .HtmlAttributes(new { type = "submit", @class = "k-primary" })
+                        .Content("ค้นหาข้อมูล"))
+            </div>
+        </div>
+
+    </div>
+</form>
+
+<div class="row">
+    <div class="col-md-4 col-lg-4">
+        <form method="post" a action='@Url.Action("InqClear")'>
+            @(Html.Kendo().Button()
+            .Name("btnClearInq")
+            .HtmlAttributes(new { type = "submit" , @class = "k-primary"})
+            .Content("ล้างค่า"))
+        </form>
+    </div>
+    <div class="col-md-8 col-lg-8">
+
+    </div>
+</div>
+<br />
+
+<script>
+    function onRequestEnd(e) {
+        if (e.type === "update") {
+            kendo.alert("ดำเนินการเปลี่ยนแปลงข้อมูลเสร็จเรียบร้อย");
+        } else if (e.type === "create") {
+            kendo.alert("ดำเนินการเพิ่มข้อมูลเสร็จเรียบร้อย");
+        } else if (e.type === "destroy") {
+            kendo.alert("ดำเนินการลบข้อมูลเสร็จเรียบร้อย");
+        }
+    }
+</script>
+
+<div class="form-group">
+    @(Html.Kendo().DataSource<SmartMotor.Models.PolicyInquiryViewModel>()
+        .Name("GridDataSource")
+        .Ajax( dataSource => {
+            dataSource
+                .Batch(true)
+                .Model(model =>
+                {
+                    model.Id(p => p.rnPolicy);
+                    model.Field(p => p.assuredName).Editable(false);
+                    model.Field(p => p.policyNo).Editable(false);
+                    model.Field(p => p.carRegistrationNo).Editable(false);
+                    model.Field(p => p.policyStartDate).Editable(false);
+                    model.Field(p => p.policyEndDate).Editable(false);
+                    model.Field(p => p.policyBasePremium).Editable(false);
+                    model.Field(p => p.policyPremiumPerKm).Editable(false);
+                    model.Field(p => p.carModel).Editable(false);
+                    model.Field(p => p.PolicyType).Editable(false);
+                    model.Field(p => p.PolicyStatus).Editable(false);
+                })
+                .Read("Inquiry_Read", "Policy")
+                .Update("Policy_Update", "Policy")
+                .PageSize(15)
+                .Events(e => e.RequestEnd("onRequestEnd"));
+        })
+        )
+</div>
+
+
+<div class="row">
+    <div class="col-md-12 col-lg-12">
+        @(Html.Kendo().Grid<SmartMotor.Models.PolicyInquiryViewModel>()
+            .Name("Grid")
+            .Columns(columns =>
+            {
+                columns.Bound(o => o.assuredName).Title("assuredName").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o.policyNo).Title("policyNo").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o.carRegistrationNo).Title("carRegistrationNo").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o.policyStartDate).Title("policyStartDate").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o.policyEndDate).Title("policyEndDate").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o.policyBasePremium).Title("policy BasePremium").HeaderHtmlAttributes(new { style = "text-align: right;" }).Filterable(false);
+
+                columns.Bound(o => o.policyPremiumPerKm).Title("policy PremiumPerKm").HeaderHtmlAttributes(new { style = "text-align: right;" }).Filterable(false);
+
+                columns.Bound(o => o.gpsId).Title("gpsId").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o.carModel).Title("carModel").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o.PolicyType).Title("PolicyType").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o.PolicyStatus).Title("PolicyStatus").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+            })
+             .ToolBar(t =>
+             {
+                 t.Save();
+             }
+              )
+             .Scrollable()
+             .ClientDetailTemplateId("template")
+             .Editable(editable => editable.Mode(GridEditMode.InCell))
+             .Navigatable()
+             .HtmlAttributes(new
+             {
+                 style = "width: 100%;font-family: DB-Ozone-X; font-size:14pt;"
+             })
+             .DataSource("GridDataSource")
+            .Pageable(pager => pager
+                .Info(true)
+                .Refresh(true)
+            )
+            .Resizable(resize => resize.Columns(true))
+            .Events(events => events
+                .DataBound("dataBound")
+            )
+        )
+    </div>
+</div>
+
+
+<script id="template" type="text/kendo-tmpl">
+    @(Html.Kendo().Grid<SmartMotor.Models.PolicyPaymentDetail>()
+            .Name("grid_#=rnPolicy#")
+            .Columns(columns =>
+            {
+                columns.Bound(o => o.start_bill_date).Title("Start Period").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o.end_bill_date).Title("End Period").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o.period_no).Title("Period No").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o.invoice_no).Title("Invoice No").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o.payment_due_date).Title("Due Date").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+        columns.Bound(o => o.gps_id).Title("gpsId").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+
+                columns.Bound(o => o.payment_type).Title("Payment Type").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o.payment_status).Title("Status").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o.paid_date).Title("Paid Date").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o.total_distance).Title("Distance (KM)").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o.premium_per_km).Title("Premium Per KM").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o.total_amount_insurer).Title("Amount (THB)").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+            })
+            .DataSource(dataSource => dataSource
+                .Ajax()
+                .Read(read => read.Action("Inquiry_Detail", "Policy", new { rnPolicy = "#=rnPolicy#" }))
+            )
+            .HtmlAttributes(new
+            {
+                style = "width: 100%;font-family: DB-Ozone-X; font-size:14pt;"
+            })
+            .Sortable()
+            .Resizable(resize => resize.Columns(true))
+            .ToClientTemplate()
+)
+</script>
+
+
+@(Html.Kendo().ContextMenu()
+    .Name("contextmenu")
+    .Target("#Grid")
+    .Filter("tr[role = 'row']")
+    .Events(ev => { ev.Select("onSelect"); })
+    .Orientation(ContextMenuOrientation.Vertical)
+    .Animation(animation =>
+    {
+        animation.Open(open =>
+        {
+            open.Fade(FadeDirection.In);
+            open.Duration(500);
+        });
+    })
+    .Items(items =>
+    {
+        items.Add().Text("Inactive").HtmlAttributes(new { id = "Inactive" });
+    })
+)
+
+
+<style>
+    .k-grid .k-grid-search {
+        margin-left: auto;
+        margin-right: 0;
+    }
+
+    .k-readonly {
+        color: gray;
+    }
+
+    /* Hide the Grid header and pager during export */
+    .k-pdf-export .k-grid-toolbar,
+    .k-pdf-export .k-pager-wrap {
+        display: none;
+    }
+
+    .k-grid .k-grid-search {
+        margin-left: auto;
+        margin-right: 0;
+    }
+
+
+    #GridID > table {
+        table-layout: fixed;
+    }
+
+    .k-dialog .k-window-titlebar .k-dialog-title {
+        visibility: hidden;
+    }
+</style>
+
+<script>
+      function dataBound() {
+        this.expandRow(this.tbody.find("tr.k-master-row").first());
+    }
+
+
+    function onSelect(e) {
+
+        var row = $(e.target);
+        var dataItem = $("#Grid").data("kendoGrid").dataItem(row);
+        var rnPolicy = dataItem.rnPolicy;
+
+
+        if (e.item.textContent == "Inactive") {
+         /*   e.sender.element.find(".k-menu-link:first").attr("href", "Policy/Selected?rnPolicy=" + rnPolicy + "&contextmenu=Inactive");*/
+            location.href = '@Url.Action("Selected", "Policy")?rnPolicy=' + rnPolicy + "&contextmenu=Inactive";
+        }
+    }
+
+    function saveChanges(e) {
+        if (!confirm("คุณต้องการบันทึกข้อมูล หรือไม่?")) {
+            e.preventDefault();
+        }
+    }
+
+</script>

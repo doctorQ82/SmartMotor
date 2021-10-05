@@ -1,0 +1,300 @@
+﻿
+@using Kendo.Mvc.UI;
+@{
+    ViewBag.Title = "GPS Stock";
+}
+
+<br />
+<h5 class="text-info">ข้อมูล GPS Stock</h5>
+<script>
+    function onRequestEnd(e) {
+        if (e.type === "update") {
+            kendo.alert("ดำเนินการเปลี่ยนแปลงข้อมูลเสร็จเรียบร้อย");
+        } else if (e.type === "create") {
+            kendo.alert("ดำเนินการเพิ่มข้อมูลเสร็จเรียบร้อย");
+        } else if (e.type === "destroy") {
+            kendo.alert("ดำเนินการลบข้อมูลเสร็จเรียบร้อย");
+        }
+    }
+</script>
+
+<div class="row">
+    <div class="col-lg-4 col-md-4 col-sm-8">
+    </div>
+        <div class="col-lg-4 col-md-4 col-sm-8">
+            @(Html.Kendo().NumericTextBox<int>()
+        .Name("UseCarKM")
+        .Format("n0")
+        .Min(1)
+        .Step(1)
+        .Max(50)
+        .Value(1)
+        .Placeholder("จำนวนอุปกรณ์ที่ต้องการเพิ่ม")
+        .HtmlAttributes(new
+        {
+        style = "width: 100%;font-family: DB-Ozone-X; font-size:14pt;color:#000000",
+        title = "numeric" ,
+        required = "required",
+        validationmessage = "จำนวนอุปกรณ์ที่ต้องการเพิ่ม"
+        })
+        )
+        </div>
+        <div class="col-lg-4 col-md-4 col-sm-4">
+            <button id="confirmBtn" class="k-button" action>ตกลง</button>
+            @*@(Html.Kendo().Button()
+                .Name("btnAdd")
+                .HtmlAttributes(new { type = "button", @class = "k-primary" })
+                .Content("ตกลง"))*@
+        </div>
+    </div>
+
+    <div class="form-group">
+        @(Html.Kendo().DataSource<SmartMotor.Models.GpsInfo>()
+        .Name("GridDataSource")
+        .Ajax( dataSource => {
+            dataSource
+                .Batch(true)
+                .Model(model =>
+                {
+                    model.Id(p => p.SID);
+                    model.Field(p => p.SID).Editable(false);
+                    model.Field(p => p.Gps_Register).Editable(false);
+                    model.Field(p => p.UseDate).Editable(false);
+                    model.Field(p => p.OrderPerfixID).Editable(false);
+                    model.Field(p => p.GpsStatus).DefaultValue(
+                    ViewData["defaulStatus"] as SmartMotor.Models.GpsStatus);
+                })
+                .Read(read => read.Action("Gps_Read", "Main"))
+                .Create("Gps_Create", "Main")
+                .Update("Gps_Update", "Main")
+                .PageSize(10)
+                .Events(e => e.RequestEnd("onRequestEnd"));
+        })
+        )
+    </div>
+
+    @(Html.Kendo().ContextMenu()
+    .Name("contextmenu")
+    .Target("#Grid")
+    .Filter("tr[role='row']")
+    .Animation(animation =>
+    {
+        animation.Open(open =>
+        {
+            open.Fade(FadeDirection.In);
+            open.Duration(500);
+        });
+    })
+    .Items(items =>
+    {
+        items.Add().Text("Active");
+        items.Add().Text("InActive");
+    })
+    .Events(e => e.Select("onSelect"))
+)
+
+
+    <script>
+    function onSelect(e) {
+
+        var grid = $("#Grid").data("kendoGrid");
+        var model = grid.dataItem(e.target);
+        var GpsId = model.GpsId;
+
+        switch ($(e.item).children(".k-link").text()) {
+            case "Active":
+                {
+                    var data = model.GpsId + '|Active';
+
+                    var url = '@Url.Action("ChangeGpsStatus", "Main", new { gpsid = "data"})'
+                    url = url.replace("data", data);
+                    location.href = url;
+                    break;
+                }
+            case "InActive":
+                {
+                    var data = model.GpsId + '|InActive';
+
+
+                    var url = '@Url.Action("ChangeGpsStatus", "Main", new { gpsid = "data"})'
+                    url = url.replace("data", data);
+                    location.href = url;
+                    break;
+                }
+        }
+    }
+
+    </script>
+
+    <div class="row">
+        <div class="col-md-12 col-lg-12">
+            @(Html.Kendo().Grid<SmartMotor.Models.GpsInfo>()
+            .Name("Grid")
+            .Columns(columns => {
+                columns.Bound(o => o.SID).Width(100).Title("No.").Groupable(false).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o.GpsId).Title("Gps ID").Width(180).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(ftb => ftb.Cell(cell => cell.ShowOperators(false)));
+
+                columns.Bound(o => o.GpsStatus.Status).Title("GPS Status").Width(180).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(ftb => ftb.Cell(cell => cell.ShowOperators(false)));
+
+
+                //columns.Bound(o => o.GpsStatus.Status).Title("GPS Status").EditorTemplateName("ClientStatusEditor").ClientTemplate("#=templateCell(data)#").Width(180).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(filterable => filterable.UI("GpsStatusFilter"));
+
+                columns.Bound(o => o.Gps_Register).Title("Gps Register").Width(120).Format("{0:dd/MM/yyyy}").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o.UseDate).Title("Use Register").Width(120).Format("{0:dd/MM/yyyy}").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o.OrderPerfixID).Title("Invoice No.").HeaderHtmlAttributes(new { style = "text-align: center;" }).Width(180).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains)));
+            })
+              .Pageable(pager => pager
+                    .Numeric(true)
+                    .Info(true)
+                    .PageSizes(true)
+                    .PreviousNext(true)
+                    .Refresh(true)
+                    .ButtonCount(5)
+                    .AlwaysVisible(false).PageSizes(new int[] { 5, 10, 20, 100, 5000 })
+                )
+              .ToolBar(t =>
+              {
+                  t.Create();
+                  t.Save();
+              }
+              )
+            .Editable(editable => editable.Mode(GridEditMode.InCell))
+            .Mobile()
+            .Navigatable()
+                  .HtmlAttributes(new
+                  {
+                      style = "width: 100%;font-family: DB-Ozone-X; font-size:14pt;"
+                  })
+            .Sortable(sortable => sortable.AllowUnsort(false))
+              .Filterable(filterable => filterable
+                .Extra(false)
+                .Operators(operators => operators
+                        .ForString(str => str.Clear()
+                        .Clear()
+                        .Contains("Contains")
+                        .StartsWith("Starts with")
+                    ))
+                )
+             .DataSource("GridDataSource")
+            .Resizable(resize => resize.Columns(true))
+        )
+        </div>
+    </div>
+
+
+    <div id="showGpsmodal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document" style="max-width:auto; max-height:auto">
+            <div class="modal-content">
+                @{
+                    Html.RenderPartial("_GpsfPartialView");
+                }
+            </div>
+        </div>
+    </div>
+
+
+    <style>
+        .modal {
+            padding: 0 !important;
+        }
+
+        /*    .modal-dialog {
+        width: 100%;
+        max-width: none;
+        height: 100%;
+        margin: 0;
+        }
+
+
+        .modal-content {
+        height: 100%;
+        border: 0;
+        border-radius: 0;
+        }*/
+
+        .k-grid .k-grid-search {
+            margin-left: auto;
+            margin-right: 0;
+        }
+
+        .k-readonly {
+            color: gray;
+        }
+
+        /* Hide the Grid header and pager during export */
+        .k-pdf-export .k-grid-toolbar,
+        .k-pdf-export .k-pager-wrap {
+            display: none;
+        }
+
+        .k-grid .k-grid-search {
+            margin-left: auto;
+            margin-right: 0;
+        }
+
+        /*   #Grid .k-grid-header .k-header {
+        font-weight: bold;
+        }
+        */
+        #GridID > table {
+            table-layout: fixed;
+        }
+
+        .k-dialog .k-window-titlebar .k-dialog-title {
+            visibility: hidden;
+        }
+    </style>
+
+
+    <script type="text/javascript">
+
+
+    function GpsStatusFilter(element) {
+    element.kendoDropDownList({
+        dataSource: {
+            transport: {
+                read: "@Url.Action("GpsMenuCustomization_Status")"
+            }
+        },
+        optionLabel: "--เลือก--"
+    });
+    }
+
+    function templateCell(data) {
+        var template = "";
+
+        if (data.dirtyFields.GpsStatus) {
+            template += "<span class='k-dirty'></span>"
+        }
+        template += data.GpsStatus.Status_Code;
+
+        return template;
+    }
+
+    function onSort(e) {
+        var gridData = e.sender.dataSource.data()
+        gridData.forEach(function (element) {
+            if (!element.ProductName) {
+                e.preventDefault()
+            }
+        });
+    }
+
+    function saveChanges(e) {
+        if (!confirm("คุณต้องการบันทึกข้อมูล หรือไม่?")) {
+            e.preventDefault();
+        }
+        }
+
+        $("#confirmBtn").on("click", function () {
+            kendo.confirm("คุณต้องการเพิ่มอุปกรณ์ GpsID หรือไม่?").then(function () {
+                kendo.alert("You chose the Ok action.");
+            }, function () {
+                kendo.alert("You chose to Cancel action.");
+            });
+        });
+
+    </script>

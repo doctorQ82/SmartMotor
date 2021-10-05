@@ -1,0 +1,284 @@
+﻿@using Kendo.Mvc.UI
+
+@{
+    ViewBag.Title = "Payment Unpaid";
+}
+
+<br />
+<h5 class="text-info">ข้อมูลยังไม่มีการชำระเงิน</h5>
+<br class="clear" />
+
+<script>
+    function onRequestEnd(e) {
+        if (e.type === "update") {
+            kendo.alert("ดำเนินการเปลี่ยนแปลงข้อมูลเสร็จเรียบร้อย");
+        } else if (e.type === "create") {
+            kendo.alert("ดำเนินการเพิ่มข้อมูลเสร็จเรียบร้อย");
+        } else if (e.type === "destroy") {
+            kendo.alert("ดำเนินการลบข้อมูลเสร็จเรียบร้อย");
+        }
+    }
+</script>
+
+@(Html.Kendo().DataSource<SmartMotor.Models.ChangePaymentUnPaid>()
+        .Name("GridDataSource")
+        .Ajax( dataSource => {
+            dataSource
+                .Batch(true)
+                .Model(model =>
+                {
+                    model.Id(p => p.pid);
+                    model.Field(p => p.Policy_no).Editable(false);
+                    model.Field(p => p.assuredName).Editable(false);
+                    model.Field(p => p.carRegistrationNo).Editable(false);
+                    model.Field(p => p.start_bill_date).Editable(false);
+                    model.Field(p => p.end_bill_date).Editable(false);
+                    model.Field(p => p.payment_type).Editable(false);
+                    model.Field(p => p.payment_status).Editable(false);
+                    model.Field(p => p.total_distance).Editable(false);
+                    model.Field(p => p.total_amount).Editable(false);
+                    model.Field(p => p.payment_due_date).Editable(false);
+                    model.Field(p => p.invoice_no).Editable(false);
+                    model.Field(p => p.pid).Editable(false);
+                })
+                .Read(read => read.Action("ChangeUnPaid_Read", "Policy"))
+                .Update("UpdateMobileNo", "Policy")
+                .Events(e => e.RequestEnd("onRequestEnd"));     
+        }
+      )
+    )
+
+@(Html.Kendo().ContextMenu()
+    .Name("contextmenu")
+    .Target("#Grid")
+    .Filter("td")
+    .Animation(animation =>
+    {
+        animation.Open(open =>
+        {
+            open.Fade(FadeDirection.In);
+            open.Duration(500);
+        });
+    })
+    .Items(items =>
+    {
+        items.Add().Text("Change Credit Card");
+        items.Add().Text("Gen QuickPay");
+    })
+    .Events(e => e.Select("onSelect"))
+)
+
+<script>
+    function onSelect(e) {
+        var index = e.target.parentElement.rowIndex;
+
+        var pid = $("#Grid").data("kendoGrid").dataSource.data()[index].pid;
+        var userIdentity = $("#Grid").data("kendoGrid").dataSource.data()[index].userIdentity;
+        var qpID = $("#Grid").data("kendoGrid").dataSource.data()[index].qpID;
+
+        switch ($(e.item).children(".k-link").text()) {
+            case "Change Credit Card":
+                {
+                    location.href = '@Url.Action("ChangeCredit", "Policy")?pid=' + pid + "&userIdentity=" + userIdentity + "&qpid=" + qpID;
+                    break;
+                }
+            case "Gen QuickPay":
+                {
+                    location.href = '@Url.Action("GenQuickPay", "Policy")?pid=' + pid + "&userIdentity=" + userIdentity + "&qpid=" + qpID;
+                    break;
+                }
+              
+        }
+    }
+
+
+</script>
+
+<div class="row">
+    <div class="col-md-12 col-lg-12">
+        @(Html.Kendo().Grid<SmartMotor.Models.ChangePaymentUnPaid>()
+            .Name("Grid")
+            .Columns(columns => {
+                columns.Bound(o => o.pid).Hidden();
+                columns.Bound(o => o.userIdentity).Hidden();
+                columns.Bound(o => o.qpID).Hidden();
+
+                columns.Bound(o => o.Policy_no).Title("หมายเลขกรมธรรม์").Width(170).HeaderHtmlAttributes(new { style = "text-align: center;" })
+                 .Filterable(ftb => ftb.Cell(cell => cell.ShowOperators(false)))
+                 .Locked(true).Lockable(false);
+
+                columns.Bound(o => o.assuredName).Title("ชื่อผู้ถือกรมธรรม์").Width(170).HeaderHtmlAttributes(new { style = "text-align: center;" })
+              .Filterable(ftb => ftb.Cell(cell => cell.ShowOperators(false))).Locked(true);
+
+
+                columns.Bound(o => o.Mobile_No).Title("เบอร์ติดต่อ").Width(120).HeaderHtmlAttributes(new { style = "text-align: center;" })
+                .Filterable(ftb => ftb.Cell(cell => cell.ShowOperators(false)));
+
+
+                columns.Bound(o => o.carRegistrationNo).Title("ทะเบียนรถ").Width(150).HeaderHtmlAttributes(new { style = "text-align: center;" })
+                .Filterable(ftb => ftb.Cell(cell => cell.ShowOperators(false)));
+
+                columns.Bound(o => o.start_bill_date).Title("วันที่เริ่มคำนวณยอด").Format("{0:dd/MM/yyyy}").HeaderHtmlAttributes(new { style = "text-align: center;" }).Width(120).Filterable(false);
+
+                columns.Bound(o => o.end_bill_date).Title("วันที่ตัดยอด").Format("{0:dd/MM/yyyy}").HeaderHtmlAttributes(new { style = "text-align: center;" }).Width(120).Filterable(false);
+
+
+                columns.Bound(o => o.payment_type).Title("วิธีการชำระ").Width(150).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(filterable => filterable.UI("PaymentFilter"));
+
+                columns.Bound(o => o.payment_status).Title("สถานะรายการ").Width(150).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(filterable => filterable.UI("StatusFilter"));
+
+                columns.Bound(o => o.total_distance).Title("ระยะทาง").Width(120).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o.total_amount).Title("จำนวนเงิน").Width(120).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o.payment_due_date).Title("วันครบกำหนด").Width(120).Format("{0:dd/MM/yyyy}").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o.invoice_no).Title("เลขที่ใบเรียกเก็บเงิน").Width(150).HeaderHtmlAttributes(new { style = "text-align: center;" }).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+
+                columns.Command(command => command.Custom("รายละเอียด").Click("showDetails")).Title("รายละเอียด").Width(120).HeaderHtmlAttributes(new { style = "text-align: center;" });
+
+
+                columns.Bound(o => o.pid).Title("เปลี่ยนวิธีชำระเงิน").Width(150).ClientTemplate("#= ChangePayment(data) #").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false).Lockable(false);
+            })
+            .ToolBar(t =>
+            {
+                t.Save();
+            }
+            )
+            .Mobile()
+            .Navigatable()
+              .Filterable(filterable => filterable
+                .Extra(false)
+                .Operators(operators => operators
+                        .ForString(str => str.Clear()
+                        .Clear()
+                        .Contains("Contains")
+                        .StartsWith("Starts with")
+                        .IsEqualTo("Is equal to")
+                        .IsNotEqualTo("Is not equal to")
+                    ))
+                )
+           .Events(evnts => evnts.DataBound("onDataBound"))
+           .Editable(editable => editable.Mode(GridEditMode.InCell))
+           .Scrollable()
+           .HtmlAttributes(new
+           {
+               style = "width: 100%;font-family: DB-Ozone-X; font-size:14pt;"
+           })
+           .DataSource("GridDataSource")
+           .Resizable(resize => resize.Columns(true))
+        )
+    </div>
+</div>
+
+
+@(Html.Kendo().Window().Name("Details")
+    .Title("รายละเอียด")
+    .Visible(false)
+    .Modal(true)
+    .Draggable(true)
+    .Width(400)
+)
+
+<script type="text/x-kendo-template" id="template">
+        <div id="details-container" style = "font-family: DB-Ozone-X; font-size:13pt;">
+        <span class="text-primary">Payment Link เพื่อส่งให้ลูกค้า
+    นำไปใช้ชำระเงิน</span>
+        </br>
+        <span class="text-danger"><em>#= payment_url #</em></span>
+        </div>
+</script>
+
+
+
+<style>
+    .k-readonly {
+        color: gray;
+    }
+
+    /* Hide the Grid header and pager during export */
+    .k-pdf-export .k-grid-toolbar,
+    .k-pdf-export .k-pager-wrap {
+        display: none;
+    }
+
+    .k-grid .k-grid-search {
+        margin-left: auto;
+        margin-right: 0;
+    }
+
+    /*    #Grid .k-grid-header .k-header {
+        font-weight: bold;
+    }*/
+
+    #GridID > table {
+        table-layout: fixed;
+    }
+
+    .k-dialog .k-window-titlebar .k-dialog-title {
+        visibility: hidden;
+    }
+</style>
+
+
+<script type="text/javascript">
+    function showDetails(e) {
+        e.preventDefault();
+
+        var detailsTemplate = kendo.template($("#template").html());
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var wnd = $("#Details").data("kendoWindow");
+
+        wnd.content(detailsTemplate(dataItem));
+        wnd.center().open();
+    }
+
+        function ChangePayment(data) {
+            var action = '@Url.Action("ChangePayment", "Policy")';
+
+            var html = kendo.format("<a href='{0}/{1}' class=\"btn btn-info\" style=\"width:80px\">เปลี่ยน</a>",
+                action,
+                data.pid + '|' + data.PayMode + '|' + data.qpID + '|' + data.SecurePay + '|' + data.ConcatData + '|' + data.IsChange
+            );
+
+            return html;
+       
+    }
+
+    function onDataBound() {
+        var grid = $("#Grid").data("kendoGrid");
+        var data = grid.dataSource.data();
+        $.each(data, function (i, row) {
+            if (row.IsChange) {
+                $('tr[data-uid="' + row.uid + '"] ').css("background-color", "Lightgreen ");
+            } else {
+                $('tr[data-uid="' + row.uid + '"] ').css("background-color", "white");
+            }
+        })
+    }
+
+    function PaymentFilter(element) {
+    element.kendoDropDownList({
+        dataSource: {
+            transport: {
+                read: "@Url.Action("PaymentMenuCustomization_Status")"
+            }
+        },
+        optionLabel: "--เลือก--"
+    });
+    }
+
+    function StatusFilter(element) {
+    element.kendoDropDownList({
+        dataSource: {
+            transport: {
+                read: "@Url.Action("StatusMenuCustomization_Status")"
+            }
+        },
+        optionLabel: "--เลือก--"
+    });
+    }
+
+
+</script>

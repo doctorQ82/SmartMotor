@@ -1,0 +1,70 @@
+﻿@model SmartMotor.Models.LoginViewModel
+@using Kendo.Mvc.UI
+@{
+    ViewBag.Title = "SmartMotor";
+    Layout = null;
+}
+
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
+@functions{
+    public string GetAntiXsrfRequestToken()
+    {
+        return Xsrf.GetAndStoreTokens(Context).RequestToken;
+    }
+}
+
+<link href="~/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+<link href="~/css/style.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+
+<div class="container">
+
+    <div class="row">
+        <div class="col-sm-12 col-xs-12 col-md-12" style="margin-top:15px">
+            <img id="imgBanner" src="~/Image/Head.png" style="max-width: 95%" runat="server">
+        </div>
+    </div>
+
+    <div id="logreg-forms">
+        <form class="form-signin" method="post" asp-controller="Login" asp-action="Login">
+            @Html.AntiForgeryToken()
+            <h3 style="text-align: center; font-family: 'DB-Ozone-X'">SmartMotor</h3>
+            @*<div asp-validation-summary="All" class="text-danger"></div>*@
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+            <div class="form-group">
+                @*<label asp-for="username"></label>*@
+                <input asp-for="username" class="form-control" placeholder="username" name="username" autofocus="" />
+                @*<span asp-validation-for="username" class="text-danger"></span>*@
+
+                @Html.ValidationMessageFor(model => model.username, "", new { @class = "text-danger" })
+            </div>
+
+
+            <div class="form-group">
+                @*<label asp-for="Password"></label>*@
+                <input asp-for="Password" class="form-control" placeholder="password" name="password" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+
+            </div>
+
+            <div class="form-group">
+                @if (ViewBag.Message != null)
+                {
+                    <div class="alert alert-danger alert-dismissible" style="margin-top:20px">
+                        @ViewBag.Message
+                    </div>}
+            </div>
+            <hr>
+            <!-- <p>Don't have an account!</p>  -->
+            <button class="btn btn-primary btn-block" type="submit" id="btn-signup"><i class="fas fa-user-plus"></i>Logon</button>
+        </form>
+
+        <input type="hidden" id="RequestVerificationToken"
+            name="RequestVerificationToken" value="@GetAntiXsrfRequestToken()">
+
+    </div>
+</div>
+
+<script src="~/lib/jquery/jquery.min.js"></script>
+

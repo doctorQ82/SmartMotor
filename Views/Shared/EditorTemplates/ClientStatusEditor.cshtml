@@ -1,0 +1,6 @@
+﻿@model SmartMotor.Models.GpsStatus
+@(Html.Kendo().DropDownListFor(m => m)
+            .DataValueField("StatusCode")
+            .DataTextField("Status")
+            .BindTo((System.Collections.IEnumerable)ViewData["_gpsStatus"])
+)

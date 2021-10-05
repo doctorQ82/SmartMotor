@@ -1,0 +1,234 @@
+﻿@using Kendo.Mvc.UI
+@Html.AntiForgeryToken()
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
+
+@functions{
+    public string GetAntiXsrfRequestToken()
+    {
+        return Xsrf.GetAndStoreTokens(Context).RequestToken;
+    }
+}
+
+<input type="hidden" id="RequestVerificationToken"
+       name="RequestVerificationToken" value="@GetAntiXsrfRequestToken()">
+@Html.AntiForgeryToken()
+
+<input type="hidden" id="RequestVerificationToken"
+       name="RequestVerificationToken" value="@GetAntiXsrfRequestToken()">
+
+<div class="row" style="margin-top:0px; padding-left:0px">
+    <div class="col-lg-12 col-md-12">
+        <img src="~/lib/Images/Cover Banner 2.png" class="img-fluid" alt="Responsive image" style="width:100%">
+    </div>
+</div>
+
+<div class="row" style="height:35px">
+</div>
+
+<div class="row">
+    <div class="col-lg-1 col-md-1">
+
+    </div>
+    <div class="col-lg-10 col-md-10">
+        <input type="image" src="~/lib/Images/insured.png" style="max-width: 200px; ">
+    </div>
+    <div class="col-lg-1 col-md-1">
+
+    </div>
+
+</div>
+@*<form id="ticketsForm" kendo-validator="true" method="post" action='@Url.Action("Save")'>*@
+    <form id="ticketsForm" data-role="validator" novalidate="novalidate"  action='@Url.Action("Save")'>
+
+        <div class="row">
+            <div class="col-lg-1 col-md-1">
+
+            </div>
+            <div class="col-lg-10 col-md-10">
+                <div class="form-group">
+                    @(Html.Kendo().DropDownList()
+                        .Name("Title")
+                        .OptionLabel("คำนำหน้า...")
+                        .OptionLabelTemplate("<span style='color:gray'>คำนำหน้า...</span>")
+                        .DataTextField("TitleDesc")
+                        .DataValueField("TitleDesc")
+                        .Height(250)
+                        .HtmlAttributes(new
+                        {
+                            style = "width: 100%;font-family: DB-Ozone-X; font-size:14pt;color:#000000",
+                            placeholder = "คำนำหน้า*",
+                            required = "required",
+                            validationmessage = "กรุณาระบุคำนำหน้า"
+                        })
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("Read_Title", "Consent");
+                        })
+                        .ServerFiltering(false);
+                    })
+                    )
+                </div>
+                <div class="col-lg-1 col-md-1">
+
+                </div>
+
+            </div>
+            <div class="col-lg-2 col-md-2">
+
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col-lg-1 col-md-1">
+            </div>
+            <div class="col-sm-8 col-md-5 col-lg-5">
+                <div class="form-group">
+                    @(Html.Kendo()
+                    .TextBox()
+                    .Name("firstName")
+                      .HtmlAttributes(new
+                      {
+                          style = "width: 100%;font-family: DB-Ozone-X; font-size:14pt;color:#000000",
+                          placeholder = "ชื่อ*",
+                          required = "required",
+                          validationmessage = "กรุณาระบุชื่อ"
+                      })
+                    )
+                </div>
+            </div>
+            <div class="col-sm-8 col-md-5 col-lg-5">
+                <div class="form-group">
+                    @(Html.Kendo()
+                    .TextBox()
+                    .Name("lastname")
+                    .HtmlAttributes(new { style = "width: 100%;font-family: DB-Ozone-X; font-size:14pt;color:#000000",
+                        placeholder = "นามสกุล*",
+                        required = "required",
+                        validationmessage = "กรุณาระบุนามสกุล"
+                    })
+                    )
+                </div>
+            </div>
+            <div class="col-lg-1 col-md-1">
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col-lg-1 col-md-1">
+            </div>
+            <div class="col-sm-8 col-md-5 col-lg-5">
+                <div class="form-group">
+                    @(Html.Kendo().MaskedTextBox()
+                    .Name("IdCard")
+                    .Mask("0-0000-00000-00-0")
+                    .HtmlAttributes(new
+                    {
+                        style = "width: 100%;font-family: DB-Ozone-X; font-size:14pt;color:#000000",
+                        placeholder = "เลขที่บัตรประชาชน*",
+                        data_validmask_msg = "ท่านใส่เลขบัตรประจำตัวประชาชนไม่ถูกต้อง",
+                        required ="required",
+                        validationmessage = "กรุณาระบุเลขที่บัตรประชาชน"
+                    }
+
+            )
+        )
+                </div>
+            </div>
+
+                <div class="col-sm-8 col-md-5 col-lg-5">
+
+                    <div class="form-group">
+                        @(Html.Kendo().MaskedTextBox()
+                        .Name("Tel")
+                        .Mask("000-000-0000")
+                        .HtmlAttributes(new
+                        {
+                        style = "width: 100%;font-family: DB-Ozone-X; font-size:14pt;color:#000000",
+                        placeholder = "เบอร์โทรศัพท์*", required =  "required", validationmessage = "กรุณาระบุเบอร์โทรศัพท์"  })
+                        )
+                    </div>
+                </div>
+
+                <div class="col-lg-1 col-md-1">
+                </div>
+            </div>
+
+
+            <div class="row">
+                <div class="col-lg-1 col-md-1">
+                </div>
+                <div class="col-sm-8 col-md-5 col-lg-5">
+                    <div class="form-group">
+                        @(Html.Kendo()
+                .TextBox()
+                .Name("email")
+                .HtmlAttributes(new
+                {
+                style = "width: 100%;font-family: DB-Ozone-X; font-size:14pt;",
+                placeholder = "อีเมล (ถ้ามี)",
+                type = "email"
+                })
+                )
+                    </div>
+                </div>
+                <div class="col-sm-8 col-md-5 col-lg-5">
+                    <div class="form-group">
+                        @(Html.Kendo()
+                    .TextBox()
+                    .Name("PolicyNo")
+                      .HtmlAttributes(new
+                      {
+                          style = "width: 100%;font-family: DB-Ozone-X; font-size:14pt;color:#000000",
+                          placeholder = "หมายเลขกรมธรรม์ (ถ้ามี)",
+                      })
+                    )
+                    </div>
+                </div>
+                <div class="col-lg-1 col-md-1">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-12 col-md-12 col-12 text-center">
+                    <input type="image" src="~/lib/Images/confirm.png" alt="Submit" style="max-width:200px;">
+                </div>
+            </div>
+    </form>
+    <div class="row" style="height:50px">
+    </div>
+
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            var container = $("#ticketsForm");
+            kendo.init(container);
+            container.kendoValidator({
+                rules: {
+                    validmask: function (input) {
+                        if (input.is("[data-validmask-msg]") && input.val() != "") {
+                            var maskedtextbox = input.data("kendoMaskedTextBox");
+
+                            alert(maskedtextbox);
+                            return maskedtextbox.value().indexOf(maskedtextbox.options.promptChar) === -1;
+                        }
+
+                        return true;
+                    }
+                }
+            });
+        });
+
+
+        function checkID(id) {
+            if (id.length != 13) return false;
+            for (i = 0, sum = 0; i < 12; i++)
+                sum += parseFloat(id.charAt(i)) * (13 - i); if ((11 - sum % 11) % 10 != parseFloat(id.charAt(12)))
+                return false; return true;
+        }
+
+    </script>

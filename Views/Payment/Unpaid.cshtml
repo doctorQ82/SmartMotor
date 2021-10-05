@@ -1,0 +1,163 @@
+﻿@using Kendo.Mvc.UI
+
+@{
+    ViewBag.Title = "Payment Unpaid";      
+}
+
+<br />
+<h5 class="text-info">ข้อมูลยังไม่มีการชำระเงิน</h5>
+<br class="clear" />
+<div class="row">
+    <div class="col-md-12 col-lg-12">
+        @(Html.Kendo().Grid<SmartMotor.Models.PaymentUnPaid>()
+            .Name("Grid")
+            .Columns(columns => {
+                columns.Bound(o => o._policy_no).Title("หมายเลขกรมธรรม์").Width(200).HeaderHtmlAttributes(new { style = "text-align: center;" })
+                 .Filterable(ftb => ftb.Cell(cell => cell.ShowOperators(false)))
+                 .Locked(true).Lockable(false);
+
+                columns.Bound(o => o._carRegistrationNo).Title("ทะเบียนรถ").Width(200).HeaderHtmlAttributes(new { style = "text-align: center;" })
+                .Filterable(ftb => ftb.Cell(cell => cell.ShowOperators(false))).Locked(true);
+
+                columns.Bound(o => o._gps_id).Title("เลขอุปกรณ์").Width(150).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(ftb => ftb.Cell(cell => cell.ShowOperators(false)));
+
+                columns.Bound(o => o._period_no).Title("รอบที่").Width(120).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o._PolicyType).Title("ประเภทข้อมูล").Width(120).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o._PolicyStatus).Title("สถานะรายการ").Width(120).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+
+                columns.Bound(o => o._start_bill_date).Title("วันที่เริ่มคำนวณยอด").Width(120).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o._end_bill_date).Title("วันที่ตัดยอด").Width(120).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+
+                columns.Bound(o => o._total_amount).Title("total amount").Width(120).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o._premium_per_km).Title("เบี้ยประกันต่อระยะ").Width(120).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+
+                columns.Bound(o => o._total_amount_insurer).Title("ค่าใช้จ่ายใน Period").Width(120).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o._payment_due_date).Title("payment due date").Width(120).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o._invoice_no).Title("เลขที่ใบเรียกเก็บเงิน").Width(120).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+
+                columns.Bound(o => o._payment_type).Title("วิธีการชำระ").Width(100).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o._payment_status).Title("สถานะการชำระ").Width(100).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Command(command => command.Custom("รายละเอียด").Click("showDetails")).Title("รายละเอียด").Width(120).HeaderHtmlAttributes(new { style = "text-align: center;" })
+                    .Lockable(false);;
+
+            })
+                      .ToolBar(toolbar =>
+                      {
+                          toolbar.Excel();
+                      })
+            .Mobile()
+            .Navigatable()
+              .Filterable(filterable => filterable
+                .Extra(false)
+                .Operators(operators => operators
+                        .ForString(str => str.Clear()
+                        .Clear()
+                        .Contains("Contains")
+                        .StartsWith("Starts with")
+                        .IsEqualTo("Is equal to")
+                        .IsNotEqualTo("Is not equal to")
+                    ))
+                )
+            .Scrollable()
+               .Excel(excel => excel
+                .FileName("UnpaidReport.xlsx")
+                .Filterable(true)
+                .ProxyURL(Url.Action("Excel_Export_Save", "Payment"))
+            )
+           .HtmlAttributes(new
+           {
+               style = "width: 100%;font-family: DB-Ozone-X; font-size:14pt;"
+           })
+            .DataSource(dataSource => dataSource
+                .Ajax()
+                .Batch(true)
+                .Read(read => read.Action("PaymentUnPaid_Read", "Payment"))
+            )
+            .Resizable(resize => resize.Columns(true))
+        )
+    </div>
+</div>
+
+
+@(Html.Kendo().Window().Name("Details")
+    .Title("รายละเอียด")
+    .Visible(false)
+    .Modal(true)
+    .Draggable(true)
+    .Width(400)
+)
+
+<script type="text/x-kendo-template" id="template">
+        <div id="details-container" style = "font-family: DB-Ozone-X; font-size:13pt;">
+        <span class="text-primary">Payment Link เพื่อส่งให้ลูกค้า
+    นำไปใช้ชำระเงิน</span>
+        </br>
+        <span class="text-danger"><em>#= _PaymentUrl #</em></span>
+        </div>
+</script>
+
+<script type="x/kendo-template" id="page-template">
+    <div class="page-template">
+        <div class="header">
+            <div style="float: right">Page #: pageNum # of #: totalPages #</div>
+            Payment Summary
+        </div>
+        <div class="watermark">Falcon Insurance</div>
+        <div class="footer">
+            Page #: pageNum # of #: totalPages #
+        </div>
+    </div>
+</script>
+
+<style>
+    .k-readonly {
+        color: gray;
+    }
+
+    /* Hide the Grid header and pager during export */
+    .k-pdf-export .k-grid-toolbar,
+    .k-pdf-export .k-pager-wrap {
+        display: none;
+    }
+
+    .k-grid .k-grid-search {
+        margin-left: auto;
+        margin-right: 0;
+    }
+
+/*    #Grid .k-grid-header .k-header {
+        font-weight: bold;
+    }*/
+
+    #GridID > table {
+        table-layout: fixed;
+    }
+
+
+</style>
+
+
+<script type="text/javascript">
+    function showDetails(e) {
+        e.preventDefault();
+
+        var detailsTemplate = kendo.template($("#template").html());
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var wnd = $("#Details").data("kendoWindow");
+
+        wnd.content(detailsTemplate(dataItem));
+        wnd.center().open();
+    }
+</script>

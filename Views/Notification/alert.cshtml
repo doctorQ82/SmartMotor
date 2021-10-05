@@ -1,0 +1,196 @@
+﻿
+<br />
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12">
+        <h5 class="text-info">Inquiry Notification</h5>
+    </div>
+</div>
+
+<form method="post" action='@Url.Action("alert")'>
+    <div class="row">
+
+        <div class="col-4 col-sm-4 col-md-4">
+
+            <div class="form-group">
+                @(Html.Kendo().TextBox()
+                        .Name("txtSearch")
+                        .Placeholder("ค้นหาทะเบียนรถยนต์ ,กรมธรรม์")
+                          .HtmlAttributes(new { style = "width: 100%", placeholder = "ทะเบียนรถยนต์ หรือกรมธรรม์", required = "required", validationmessage = "Enter {0}" })
+                    )
+            </div>
+
+
+        </div>
+        <div class="col-4 col-sm-4 col-md-4">
+            <div class="form-group text-left">
+                @(Html.Kendo().Button()
+                        .Name("BtnSearch")
+                        .HtmlAttributes(new { type = "submit", @class = "k-primary" })
+                        .Content("ค้นหาข้อมูล"))
+            </div>
+        </div>
+
+    </div>
+</form>
+
+<div class="row">
+    <div class="col-md-4 col-lg-4">
+        <form method="post" a action='@Url.Action("InqClear")'>
+            @(Html.Kendo().Button()
+            .Name("btnClearInq")
+            .HtmlAttributes(new { type = "submit" , @class = "k-primary"})
+            .Content("ล้างค่า"))
+        </form>
+    </div>
+    <div class="col-md-8 col-lg-8">
+
+    </div>
+</div>
+
+<br />
+
+<div class="row">
+    <div class="col-md-12 col-lg-12">
+        @(Html.Kendo().Grid<SmartMotor.Models.PolicyInquiryViewModel>()
+            .Name("Grid")
+            .Columns(columns =>
+            {
+                columns.Bound(o => o.assuredName).Title("assuredName").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o.policyNo).Title("policyNo").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(ftb => ftb.Cell(cell => cell.ShowOperators(false)));
+
+                columns.Bound(o => o.carRegistrationNo).Title("carRegistrationNo").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o.policyStartDate).Title("policyStartDate").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o.policyEndDate).Title("policyEndDate").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o.policyBasePremium).Title("policy BasePremium").HeaderHtmlAttributes(new { style = "text-align: right;" }).Filterable(false);
+
+                columns.Bound(o => o.policyPremiumPerKm).Title("policy PremiumPerKm").HeaderHtmlAttributes(new { style = "text-align: right;" }).Filterable(false);
+
+                columns.Bound(o => o.gpsId).Title("gpsId").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(ftb => ftb.Cell(cell => cell.ShowOperators(false)));
+
+                columns.Bound(o => o.carModel).Title("carModel").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o.PolicyType).Title("PolicyType").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+                columns.Bound(o => o.PolicyStatus).Title("PolicyStatus").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+            })
+             .Scrollable()
+             .ClientDetailTemplateId("template")
+             .Navigatable()
+             .HtmlAttributes(new
+             {
+                 style = "width: 100%;font-family: DB-Ozone-X; font-size:14pt;"
+             })
+              .Filterable(filterable => filterable
+                .Extra(false)
+                .Operators(operators => operators
+                        .ForString(str => str.Clear()
+                        .Clear()
+                        .Contains("Contains")
+                        .StartsWith("Starts with")
+                        .IsEqualTo("Is equal to")
+                        .IsNotEqualTo("Is not equal to")
+                    ))
+                )
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Batch(true)
+            .Read("InquiryNoti_Read", "Notification")
+            .Model(model => {
+                model.Id(p => p.rnPolicy);
+                model.Field(p => p.assuredName).Editable(false);
+                model.Field(p => p.policyNo).Editable(false);
+                model.Field(p => p.carRegistrationNo).Editable(false);
+                model.Field(p => p.policyStartDate).Editable(false);
+                model.Field(p => p.policyEndDate).Editable(false);
+                model.Field(p => p.policyBasePremium).Editable(false);
+                model.Field(p => p.policyPremiumPerKm).Editable(false);
+                model.Field(p => p.carModel).Editable(false);
+                model.Field(p => p.PolicyType).Editable(false);
+                model.Field(p => p.PolicyStatus).Editable(false);
+            })
+            )
+            .Pageable(pager => pager
+                .Info(true)
+                .Refresh(true)
+            )
+            .Resizable(resize => resize.Columns(true))
+            .Events(events => events
+                .DataBound("dataBound")
+            )
+        )
+    </div>
+</div>
+
+
+<script id="template" type="text/kendo-tmpl">
+    @(Html.Kendo().Grid<SmartMotor.Models.NotificationAlert>()
+            .Name("grid_#=policyNo#")
+            .Columns(columns =>
+            {
+                columns.Bound(o => o.RunNo).Title("No.").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false).Width(80);
+
+
+                columns.Bound(o => o.policy_no).Title("Policy No").HeaderHtmlAttributes(new { style = "text-align: center;" }).Format("{0:dd/MM/yyyy}").Filterable(false).Width(150);
+
+                columns.Bound(o => o.invoice_no).Title("Invoice No").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false).Width(150) ;
+
+                columns.Bound(o => o.due_date).Title("Due Date").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false).Width(120);
+
+                columns.Bound(o => o.Message_Type).Title("Messate Type").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false).Width(150);
+
+                columns.Bound(o => o.MessageText).Title("Message").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false).Width(400);
+
+                columns.Bound(o => o.SendDate).Title("Send Date").HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false).Width(150); 
+            })
+            .DataSource(dataSource => dataSource
+                .Ajax()
+                .Read(read => read.Action("Log_Detail", "Notification", new { policyNo = "#=policyNo#" }))
+            )
+            .HtmlAttributes(new
+            {
+                style = "width: 100%;font-family: DB-Ozone-X; font-size:14pt;"
+            })
+            .Sortable()
+            .Resizable(resize => resize.Columns(true))
+            .ToClientTemplate()
+)
+</script>
+
+<style>
+    .k-grid .k-grid-search {
+        margin-left: auto;
+        margin-right: 0;
+    }
+
+    .k-readonly {
+        color: gray;
+    }
+
+    /* Hide the Grid header and pager during export */
+    .k-pdf-export .k-grid-toolbar,
+    .k-pdf-export .k-pager-wrap {
+        display: none;
+    }
+
+    .k-grid .k-grid-search {
+        margin-left: auto;
+        margin-right: 0;
+    }
+
+
+    #GridID > table {
+        table-layout: fixed;
+    }
+</style>
+
+<script>
+    function dataBound() {
+        this.expandRow(this.tbody.find("tr.k-master-row").first());
+    }
+
+</script>

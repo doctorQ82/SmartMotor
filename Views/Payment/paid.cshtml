@@ -1,0 +1,194 @@
+﻿@using Kendo.Mvc.UI
+@model SmartMotor.Models.DateRangViewModel;
+
+@{
+    ViewBag.Title = "Payment Summary";
+}
+
+<br/>
+<h5 class="text-info">สืบค้นข้อมูลชำระเงิน (ช่วงวันที่ ...ถึง วันที่ ...)</h5>
+<form method="post" action='@Url.Action("Paid")'>
+    <div class="row">
+        <div class="col-md-3 col-lg-3">
+            @(Html.Kendo().DatePicker()
+                    .Name("dStart")
+                    .Format("dd/MM/yyyy")
+                    .HtmlAttributes(new { style = "width: 100%", title = "วันที่เริ่มต้น" })
+                    )
+        </div>
+        <div class="col-md-3 col-lg-3">
+            @(Html.Kendo().DatePicker()
+                    .Name("dEnd")
+                    .Format("dd/MM/yyyy")
+                    .HtmlAttributes(new { style = "width: 100%", title = "วันที่สินสุด" })
+                    )
+        </div>
+        <div class="col-md-6 col-lg-6">
+            @(Html.Kendo().Button()
+                .Name("btnSearchInq")
+                .HtmlAttributes(new { type = "submit", @class = "k-primary" })
+                .Content("ค้นหา")
+                )
+
+        </div>
+    </div>
+</form>
+
+<br />
+<div class="row">
+    <div class="col-md-4 col-lg-4">
+
+        <form method="post" a action='@Url.Action("Clear")'>
+            @(Html.Kendo().Button()
+            .Name("btnClearInq")
+            .HtmlAttributes(new { type = "submit" , @class = "k-primary"})
+            .Content("ล้างค่า"))
+        </form>
+    </div>
+    <div class="col-md-8 col-lg-8">
+
+    </div>
+</div>
+
+
+<div class="form-group">
+    @if (ViewBag.Message != null)
+    {
+        <div class="alert alert-primary alert-dismissible" style="margin-top:20px">
+            @ViewBag.Message
+        </div>
+        }
+</div>
+
+<br class="clear" />
+
+<div class="row">
+    <div class="col-md-12 col-lg-12">
+        @(Html.Kendo().Grid<SmartMotor.Models.PaymentSummary>()
+        .Name("Grid")
+    .Columns(columns => {
+        columns.Bound(o => o._policy_no).Title("หมายเลขกรมธรรม์").Width(200).HeaderHtmlAttributes(new { style = "text-align: center;" })
+        .Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Locked(true).Lockable(false); ;
+
+        columns.Bound(o => o._gps_id).Title("เลขอุปกรณ์").Width(150).HeaderHtmlAttributes(new { style = "text-align: center;" })
+        .Filterable(ftb => ftb.Cell(cell => cell.ShowOperators(false))).Locked(true); ;
+
+        columns.Bound(o => o._period_no).Title("รอบที่").Width(120).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+        columns.Bound(o => o._start_bill_date).Title("วันที่เริ่มคำนวณยอด").Width(120).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+        columns.Bound(o => o._end_bill_date).Title("วันที่ตัดยอด").Width(120).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+
+        columns.Bound(o => o._total_distance).Title("total distance").Width(120).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+        columns.Bound(o => o._current_distance).Title("current distance").Width(120).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+        columns.Bound(o => o._previous_distance).Title("previous distance").Width(120).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+        columns.Bound(o => o._total_amount).Title("total amount").Width(120).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+        columns.Bound(o => o._premium_per_km).Title("เบี้ยประกันต่อระยะ").Width(120).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+        columns.Bound(o => o._total_discount).Title("total discount").Width(120).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+        columns.Bound(o => o._total_amount_insurer).Title("total amount insurer").Width(120).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+        columns.Bound(o => o._payment_due_date).Title("payment due date").Width(120).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+        columns.Bound(o => o._invoice_no).Title("เลขที่ใบเรียกเก็บเงิน").Width(120).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+
+        columns.Bound(o => o._payment_url).Title("payment url").Width(150).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+        columns.Bound(o => o._payment_type).Title("วิธีการชำระ").Width(100).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+        columns.Bound(o => o._payment_status).Title("สถานะการชำระ").Width(150).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(filterable => filterable.UI("StatusFilter"));
+
+        columns.Bound(o => o._paid_date).Title("วันที่ชำระ").Width(120).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+        columns.Bound(o => o._tax_invoice_url).Title("ใบกำกับภาษี").Width(120).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+        columns.Bound(o => o._payment_channel).Title("ช่องทางการจ่ายเงิน").Width(120).HeaderHtmlAttributes(new { style = "text-align: center;" }).Filterable(false);
+
+    })
+    .ToolBar(toolbar =>
+    {
+        toolbar.Excel();
+    })
+    .Mobile()
+    .Navigatable()
+   .Filterable(filterable => filterable
+    .Extra(false)
+    .Operators(operators => operators
+    .ForString(str => str.Clear()
+    .Contains("Contains")
+    .StartsWith("Starts with")
+    .IsEqualTo("Is equal to")
+    .IsNotEqualTo("Is not equal to")
+    ))
+    )
+    .Scrollable()
+    .Excel(excel => excel
+    .FileName("PaymentReport.xlsx")
+    .Filterable(true)
+    .ProxyURL(Url.Action("Excel_Export_Save", "Payment"))
+    )
+    .HtmlAttributes(new
+    {
+        style = "width: 100%;font-family: DB-Ozone-X; font-size:14pt;"
+    })
+    .DataSource(dataSource => dataSource
+    .Ajax()
+    .Batch(true)
+    .Read(read => read.Action("Payment_Read", "Payment"))
+    )
+    .Resizable(resize => resize.Columns(true))
+    )
+</div>
+</div>
+
+<style>
+    .k-grid .k-grid-search {
+        margin-left: auto;
+        margin-right: 0;
+    }
+
+    .k-readonly {
+        color: gray;
+    }
+
+    /* Hide the Grid header and pager during export */
+    .k-pdf-export .k-grid-toolbar,
+    .k-pdf-export .k-pager-wrap {
+        display: none;
+    }
+
+    .k-grid .k-grid-search {
+        margin-left: auto;
+        margin-right: 0;
+    }
+
+ /*   #Grid .k-grid-header .k-header {
+        font-weight: bold;
+    }*/
+
+    #GridID > table {
+        table-layout: fixed;
+    }
+
+</style>
+
+
+<script type="text/javascript">
+        function StatusFilter(element) {
+            element.kendoDropDownList({
+                dataSource: {
+                    transport: {
+                        read: "@Url.Action("FilterMenuCustomization_Status")"
+                    }
+                },
+                optionLabel: "--เลือก--"
+            });
+        }
+</script>
